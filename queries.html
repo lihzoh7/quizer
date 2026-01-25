@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SPACE GLASS - Queries</title>
+<style>
+body { background-color: purple; font-family: Arial, sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
+.container { width:400px; color:white; }
+input, textarea { width:100%; padding:10px; margin:5px 0; border-radius:4px; border:none; }
+textarea { height:100px; }
+button { width:100%; padding:10px; margin-top:10px; background-color:green; color:white; border:none; border-radius:4px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Submit Your Query</h1>
+  <input id="name" placeholder="Name">
+  <input id="surname" placeholder="Surname">
+  <input id="idNumber" placeholder="ID Number">
+  <textarea id="query" placeholder="Your Query"></textarea>
+  <button id="submitQuery">SUBMIT</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBqJTLjxhZBCsvjrTH_cG0fkXlElG6BqTg",
+  authDomain: "tose-ccf8f.firebaseapp.com",
+  databaseURL: "https://tose-ccf8f-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "tose-ccf8f",
+  storageBucket: "tose-ccf8f.firebasestorage.app",
+  messagingSenderId: "475447495901",
+  appId: "1:475447495901:web:9189276a162a3680afdf34",
+  measurementId: "G-PWC5R6Q8JD"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+document.getElementById('submitQuery').addEventListener('click', async () => {
+  const queryData = {
+    name: document.getElementById('name').value.trim(),
+    surname: document.getElementById('surname').value.trim(),
+    idNumber: document.getElementById('idNumber').value.trim(),
+    query: document.getElementById('query').value.trim(),
+    timestamp: new Date().toISOString()
+  };
+
+  for (let key in queryData) {
+    if (!queryData[key]) return alert('Fill all fields');
+  }
+
+  try {
+    await push(ref(db, 'queries'), queryData);
+    alert('Query submitted');
+    window.location.href = 'index.html'; // redirect back to login
+  } catch(err) {
+    alert(err.message);
+  }
+});
+</script>
+</body>
+</html>
