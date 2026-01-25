@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SPACE GLASS - Messages</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#6a0dad;
+  color:white;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+#container{
+  width:420px;
+  height:520px;
+  background:#fff;
+  color:#000;
+  border-radius:10px;
+  overflow:hidden;
+  position:relative;
+}
+#top{
+  background:#6a0dad;
+  color:white;
+  padding:10px;
+  display:flex;
+  align-items:center;
+}
+#back{
+  cursor:pointer;
+  font-size:18px;
+  margin-right:10px;
+}
+#title{
+  font-weight:bold;
+}
+#list{
+  height:470px;
+  overflow-y:auto;
+}
+.message{
+  padding:10px;
+  border-bottom:1px solid #ddd;
+  cursor:pointer;
+  position:relative;
+}
+.message.unread{
+  font-weight:bold;
+  background:#f4e8ff;
+}
+.message.read{
+  font-weight:normal;
+}
+.msg-time{
+  font-size:11px;
+  color:#666;
+}
+.delete{
+  position:absolute;
+  right:10px;
+  top:10px;
+  cursor:pointer;
+}
+.msg-body{
+  display:none;
+  margin-top:8px;
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="container">
+  <div id="top">
+    <div id="back" onclick="goBack()">↩️</div>
+    <div id="title">MESSAGES</div>
+  </div>
+  <div id="list"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBqJTLjxhZBCsvjrTH_cG0fkXlElG6BqTg",
+  authDomain: "tose-ccf8f.firebaseapp.com",
+  databaseURL: "https://tose-ccf8f-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "tose-ccf8f",
+  storageBucket: "tose-ccf8f.firebasestorage.app",
+  messagingSenderId: "475447495901",
+  appId: "1:475447495901:web:9189276a162a3680afdf34"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const email = localStorage.getItem("currentUserEmail");
+if(!email){
+  setTimeout(()=>window.location.href="index.html",300);
+}
+
+let userKey = null;
+
+/* FIND USER */
+async function loadUser(){
+  const snap = await get(ref(db,"users"));
+  const users = snap.val() || {};
+  for(const k in users){
+    if(users[k].email === email){
+      userKey = k;
+      loadMessages();
+      return;
+    }
+  }
+  alert("User not found");
+  window.location.href="index.html";
+}
+
+/* LOAD MESSAGES (LIVE) */
+function loadMessages(){
+  const list = document.getElementById("list");
+  onValue(ref(db,`messages/${userKey}`), snap=>{
+    list.innerHTML="";
+    const msgs = snap.val();
+    if(!msgs) return;
+
+    const entries = Object.entries(msgs)
+      .sort((a,b)=>b[1].timestamp - a[1].timestamp);
+
+    entries.forEach(([id,msg])=>{
+      const div = document.createElement("div");
+      div.className = "message " + (msg.read ? "read":"unread");
+
+      div.innerHTML = `
+        <div>${msg.title || "Message"}</div>
+        <div class="msg-time">${new Date(msg.timestamp).toLocaleString()}</div>
+        <div class="delete">🚮</div>
+        <div class="msg-body">${msg.body}</div>
+      `;
+
+      /* READ / EXPAND */
+      div.addEventListener("click", async ()=>{
+        const body = div.querySelector(".msg-body");
+        body.style.display = body.style.display==="block"?"none":"block";
+        if(!msg.read){
+          await update(ref(db,`messages/${userKey}/${id}`),{ read:true });
+        }
+      });
+
+      /* DELETE */
+      div.querySelector(".delete").addEventListener("click", async (e)=>{
+        e.stopPropagation();
+        await remove(ref(db,`messages/${userKey}/${id}`));
+      });
+
+      list.appendChild(div);
+    });
+  });
+}
+
+function goBack(){
+  window.location.href="main-menu.html";
+}
+
+loadUser();
+</script>
+
+</body>
+</html>
