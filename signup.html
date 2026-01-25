@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SPACE GLASS - Sign Up</title>
+<style>
+body { 
+  background-color: lightblue; 
+  font-family: Arial, sans-serif; 
+  display:flex; 
+  justify-content:center; 
+  align-items:center; 
+  height:100vh; 
+  margin:0; 
+}
+.container { 
+  width:400px; 
+  background: rgba(0,0,0,0.1); 
+  padding:20px; 
+  border-radius:8px; 
+}
+h1 { 
+  color:white; 
+  font-size:14px; 
+  text-align:center; 
+  margin-bottom:10px; 
+}
+input { 
+  width:100%; 
+  padding:10px; 
+  margin:5px 0; 
+  box-sizing:border-box; 
+  border-radius:4px; 
+  border:none; 
+}
+#submitBtn { 
+  width:100%; 
+  padding:10px; 
+  margin-top:10px; 
+  background-color:green; 
+  color:white; 
+  border:none; 
+  border-radius:4px; 
+  cursor:pointer; 
+}
+#back { 
+  position:absolute; 
+  top:10px; 
+  left:10px; 
+  cursor:pointer; 
+  font-size:18px; 
+}
+small { color:white; font-size:10px; }
+</style>
+</head>
+
+<body>
+<div id="back" onclick="window.location.href='index.html'">↩️</div>
+
+<div class="container">
+  <h1>PERSONAL DETAILS</h1>
+
+  <input id="name" placeholder="Name">
+  <input id="surname" placeholder="Surname">
+  <input id="email" type="email" placeholder="Email">
+  <input id="cellNumber" placeholder="Cell Number">
+
+  <h1 style="margin-top:15px;">SECURITY</h1>
+  <input id="password" type="password" placeholder="Password">
+  <small>Password must be at least 8 characters</small>
+  <input id="confirmPassword" type="password" placeholder="Confirm Password">
+
+  <button id="submitBtn">SUBMIT</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword 
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { 
+  getDatabase, 
+  ref, 
+  set 
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBqJTLjxhZBCsvjrTH_cG0fkXlElG6BqTg",
+  authDomain: "tose-ccf8f.firebaseapp.com",
+  databaseURL: "https://tose-ccf8f-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "tose-ccf8f"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+document.getElementById("submitBtn").addEventListener("click", async () => {
+  const name = document.getElementById("name").value.trim();
+  const surname = document.getElementById("surname").value.trim();
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const cellNumber = document.getElementById("cellNumber").value.trim();
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+
+  if (!name || !surname || !email || !cellNumber || !password || !confirmPassword) {
+    alert("Fill all fields");
+    return;
+  }
+
+  if (password.length < 8) {
+    alert("Password must be at least 8 characters");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+    // store profile WITHOUT password
+    await set(ref(db, "users/" + cred.user.uid), {
+      uid: cred.user.uid,
+      name,
+      surname,
+      email,
+      cellNumber,
+      createdAt: Date.now()
+    });
+
+    alert("Account created successfully. Please log in.");
+    window.location.href = "index.html";
+
+  } catch (err) {
+    alert(err.message);
+  }
+});
+</script>
+</body>
+</html>
