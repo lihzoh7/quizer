@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quiz Maker - Video Display</title>
+<style>
+  body { margin:0; padding:20px; font-family:Arial; background:#0b2913; color:white; }
+  h1 { text-align:center; color:#a3e6b3; }
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 30px;
+  }
+  .card {
+    background: #133a1c;
+    border: 1px solid #a3e6b3;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .video-placeholder {
+    height: 150px;
+    background: #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    border-radius: 4px;
+  }
+  .card-title { margin-top: 10px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  
+  /* Zoom Screen Overlay */
+  .zoom-overlay {
+    position: fixed;
+    top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.95);
+    display: none;
+    flex-direction: column;
+    z-index: 100;
+    overflow-y: auto;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .close-btn { position: absolute; top:20px; right:30px; font-size:40px; color:white; cursor:pointer; }
+  .zoom-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+  }
+  video { max-width: 85%; max-height: 45vh; border: 1px solid #fff; outline:none; }
+  
+  .qa-container {
+    width: 90%;
+    margin-top: 25px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .qa-block { background: #133a1c; border: 1px solid #a3e6b3; padding: 15px; border-radius: 6px; }
+  .qa-line { margin-bottom: 8px; border-bottom: 1px dashed #555; padding-bottom: 4px; }
+  .qa-line strong { color: #a3e6b3; }
+</style>
+</head>
+<body>
+
+  <h1>VIDEO RELEASES</h1>
+  <div class="grid-container" id="galleryGrid"></div>
+
+  <div class="zoom-overlay" id="zoomOverlay">
+    <div class="close-btn" id="closeBtn">&times;</div>
+    <div class="zoom-content">
+      <video id="zoomTargetVideo" controls></video>
+      <h2 id="zoomTitle" style="margin-top:15px;"></h2>
+      
+      <div class="qa-container">
+        <div class="qa-block">
+          <h3>QUESTIONS</h3>
+          <div id="questionsContainer"></div>
+        </div>
+        <div class="qa-block">
+          <h3>ANSWERS</h3>
+          <div id="answersContainer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBqJTLjxhZBCsvjrTH_cG0fkXlElG6BqTg",
+    authDomain: "tose-ccf8f.firebaseapp.com",
+    databaseURL: "https://tose-ccf8f-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "tose-ccf8f",
+    storageBucket: "tose-ccf8f.appspot.com",
+    messagingSenderId: "475447495901",
+    appId: "1:475447495901:web:9189276a162a3680afdf34"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const galleryGrid = document.getElementById("galleryGrid");
+  const zoomOverlay = document.getElementById("zoomOverlay");
+  const videoPlayer = document.getElementById("zoomTargetVideo");
+
+  // Load Data
+  const snap = await get(ref(db, "quizes/video"));
+  if(snap.exists()){
+    const data = snap.val();
+    Object.keys(data).forEach(key => {
+      const item = data[key];
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `<div class="video-placeholder">📸</div><div class="card-title">${item.fileName}</div>`;
+      card.onclick = () => openZoomView(item);
+      galleryGrid.appendChild(card);
+    });
+  } else {
+    galleryGrid.innerHTML = "<p style='grid-column: span 3; text-align:center;'>No video elements discovered.</p>";
+  }
+
+  function openZoomView(item) {
+    videoPlayer.src = item.fileUrl;
+    document.getElementById("zoomTitle").innerText = item.fileName;
+    
+    const qCont = document.getElementById("questionsContainer");
+    const aCont = document.getElementById("answersContainer");
+    qCont.innerHTML = "";
+    aCont.innerHTML = "";
+
+    for(let i=1; i<=10; i++) {
+      qCont.innerHTML += `<div class="qa-line"><strong>${i}.</strong> ${item.questions['q'+i] || 'N/A'}</div>`;
+      aCont.innerHTML += `<div class="qa-line"><strong>${i}.</strong> ${item.answers['a'+i] || 'N/A'}</div>`;
+    }
+    zoomOverlay.style.display = "flex";
+  }
+
+  document.getElementById("closeBtn").onclick = () => {
+    zoomOverlay.style.display = "none";
+    videoPlayer.pause(); // Kill video playback tracking
+  };
+</script>
+</body>
+</html>
