@@ -2,198 +2,183 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Quizer Maker - Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Maker</title>
 <style>
   body {
     margin: 0;
-    padding: 0;
     font-family: Arial, sans-serif;
-    background-color: #0b2913; /* Dark Green */
-    color: #e0f2e5;
-    height: 100vh;
-    overflow: hidden;
-    position: relative;
+    background-color: #013220;
+    color: white;
+    min-height: 100vh;
+    box-sizing: border-box;
+    padding-top: 60px;
   }
-  /* Top Navigation */
-  nav {
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: #02442A;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 40px;
-    background: rgba(0, 0, 0, 0.2);
-  }
-  nav a {
-    color: #a3e6b3; /* Light Green */
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 1.5rem;
-    transition: 0.2s;
-  }
-  nav a:hover {
-    color: #ffffff;
-  }
-  /* Big Plus Sign Centered */
-  .center-plus {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 15rem;
-    color: white;
-    cursor: pointer;
-    user-select: none;
-    transition: transform 0.2s;
-  }
-  .center-plus:hover {
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-  /* Modal Background Overlay */
-  .modal-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    display: none;
-    justify-content: center;
-    align-items: center;
+    padding: 0 20px;
+    box-sizing: border-box;
     z-index: 10;
   }
-  /* Media Type Selector Boxes */
-  .type-selector-container {
-    display: flex;
-    gap: 30px;
+  header a {
+    color: #90EE90;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 18px;
   }
-  .type-box {
-    background: #4a4a4a; /* Grey Pop up Box */
+  #plus-container {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 50px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+  #plus-sign {
+    font-size: 150px;
     color: white;
-    width: 150px;
-    height: 150px;
+    user-select: none;
+  }
+  .modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+  }
+  .modal-box {
+    background: #333;
+    padding: 30px;
+    border-radius: 10px;
+    display: flex;
+    gap: 20px;
+  }
+  .square-btn {
+    background: #555;
+    color: white;
+    width: 100px;
+    height: 100px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    border-radius: 10px;
     cursor: pointer;
+    border-radius: 8px;
     font-weight: bold;
-    font-size: 1.2rem;
-    transition: 0.2s;
+    font-size: 14px;
   }
-  .type-box:hover {
-    transform: scale(1.05);
-    background: #5a5a5a;
+  .square-btn span {
+    font-size: 28px;
+    margin-top: 5px;
   }
-  .type-box span {
-    font-size: 3rem;
-    margin-top: 10px;
-  }
-  /* Data Input Panel */
-  .data-panel {
-    background: #133a1c;
-    width: 85%;
-    max-width: 900px;
-    max-height: 85vh;
-    overflow-y: auto;
-    border-radius: 12px;
-    padding: 20px;
+  #editor-container {
     display: none;
-    border: 2px solid #a3e6b3;
+    max-width: 800px;
+    margin: 20px auto;
+    background: #02442A;
+    padding: 20px;
+    border-radius: 8px;
   }
   .stretched-tile {
-    background: #1c5228;
+    background: #222;
     padding: 12px;
+    margin-bottom: 15px;
     text-align: center;
     font-weight: bold;
-    font-size: 1.3rem;
-    border-radius: 6px;
-    margin-bottom: 15px;
-    color: white;
+    border-radius: 4px;
+    word-break: break-all;
   }
-  .grid-3-col {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-bottom: 20px;
+  .section-header {
+    background: #444;
     padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 15px;
   }
-  .field-group {
+  .grid-3col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin: 10px 0;
+  }
+  .input-field {
     display: flex;
     flex-direction: column;
   }
-  .field-group label {
-    font-size: 0.85rem;
-    margin-bottom: 4px;
-    color: #a3e6b3;
+  .input-field label {
+    font-size: 12px;
+    color: #90EE90;
+    margin-bottom: 2px;
   }
-  .field-group input {
+  .input-field input {
     padding: 8px;
+    border: none;
     border-radius: 4px;
-    border: 1px solid #444;
-    background: #fff;
-    color: #000;
   }
-  .submit-btn {
-    background: #3a86ff; /* Light Blue */
-    color: white;
+  #submit-btn {
+    background-color: #87CEEB;
+    color: black;
+    width: 100%;
     padding: 15px;
-    text-align: center;
+    font-size: 18px;
     font-weight: bold;
-    font-size: 1.4rem;
-    border-radius: 8px;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
-    user-select: none;
-    margin-top: 10px;
-  }
-  .submit-btn:hover {
-    background: #4ea8ff;
+    margin-top: 20px;
   }
 </style>
 </head>
 <body>
 
-  <nav>
-    <a href="images.html">IMAGES</a>
-    <a href="audio.html">AUDIO</a>
-    <a href="video.html">VIDEO</a>
-  </nav>
+<header>
+  <a href="images.html">IMAGES</a>
+  <a href="audio.html">AUDIO</a>
+  <a href="video.html">VIDEO</a>
+</header>
 
-  <div class="center-plus" id="openModalBtn">+</div>
+<div id="plus-container">
+  <div id="plus-sign">＋</div>
+</div>
 
-  <div class="modal-overlay" id="modalOverlay">
-    
-    <div class="type-selector-container" id="typeSelector">
-      <div class="type-box" data-type="audio">
-        Audio
-        <span>🔊</span>
-      </div>
-      <div class="type-box" data-type="images">
-        Images
-        <span>🖼</span>
-      </div>
-      <div class="type-box" data-type="video">
-        Video
-        <span>📸</span>
-      </div>
-    </div>
-
-    <div class="data-panel" id="dataPanel">
-      <div class="stretched-tile" id="fileDetailTile">Selected File: None</div>
-      
-      <div class="stretched-tile">QUESTIONS</div>
-      <div class="grid-3-col" id="questionsGrid"></div>
-
-      <div class="stretched-tile">ANSWERS</div>
-      <div class="grid-3-col" id="answersGrid"></div>
-
-      <div class="submit-btn" id="submitBtn">SUBMIT</div>
-    </div>
-
+<div class="modal" id="uploadModal">
+  <div class="modal-box">
+    <div class="square-btn" onclick="triggerFile('audio')">Audio<br><span>🔊</span></div>
+    <div class="square-btn" onclick="triggerFile('image')">Images<br><span>🖼</span></div>
+    <div class="square-btn" onclick="triggerFile('video')">Video<br><span>📸</span></div>
   </div>
+</div>
 
-  <input type="file" id="hiddenFileInput" style="display: none;">
+<input type="file" id="fileInput" style="display:none;">
+
+<div id="editor-container">
+  <div class="stretched-tile" id="fileNameTile">File Name: None</div>
+  
+  <div class="section-header">QUESTIONS</div>
+  <div class="grid-3col" id="questionsGrid"></div>
+
+  <div class="section-header">ANSWERS</div>
+  <div class="grid-3col" id="answersGrid"></div>
+
+  <button id="submit-btn">SUBMIT</button>
+</div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-  import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+  import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBqJTLjxhZBCsvjrTH_cG0fkXlElG6BqTg",
@@ -207,96 +192,69 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  const storage = getStorage(app);
 
-  let selectedType = "";
-  let targetFile = null;
+  let currentType = '';
+  let base64Data = '';
+  let fileName = '';
 
-  const modalOverlay = document.getElementById("modalOverlay");
-  const typeSelector = document.getElementById("typeSelector");
-  const dataPanel = document.getElementById("dataPanel");
-  const hiddenFileInput = document.getElementById("hiddenFileInput");
-  const fileDetailTile = document.getElementById("fileDetailTile");
+  const modal = document.getElementById('uploadModal');
+  const fileInput = document.getElementById('fileInput');
 
-  // Dynamically generate inputs for 1-10
-  const qGrid = document.getElementById("questionsGrid");
-  const aGrid = document.getElementById("answersGrid");
+  document.getElementById('plus-container').onclick = () => modal.style.display = 'flex';
+  
+  window.triggerFile = function(type) {
+    currentType = type;
+    modal.style.display = 'none';
+    if(type === 'audio') fileInput.accept = "audio/*";
+    if(type === 'image') fileInput.accept = "image/*";
+    if(type === 'video') fileInput.accept = "video/*";
+    fileInput.click();
+  };
+
+  // Build inputs dynamically
+  const qGrid = document.getElementById('questionsGrid');
+  const aGrid = document.getElementById('answersGrid');
   for(let i=1; i<=10; i++){
-    qGrid.innerHTML += `<div class="field-group"><label>Question ${i}</label><input type="text" id="q_${i}" required></div>`;
-    aGrid.innerHTML += `<div class="field-group"><label>Answer ${i}</label><input type="text" id="a_${i}" required></div>`;
+    qGrid.innerHTML += `<div class="input-field"><label>${i}</label><input type="text" id="q-${i}"></div>`;
+    aGrid.innerHTML += `<div class="input-field"><label>${i}</label><input type="text" id="a-${i}"></div>`;
   }
 
-  // Open Modal
-  document.getElementById("openModalBtn").onclick = () => {
-    modalOverlay.style.display = "flex";
-    typeSelector.style.display = "flex";
-    dataPanel.style.display = "none";
-  };
+  fileInput.onchange = function(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+    fileName = file.name;
+    document.getElementById('fileNameTile').innerText = "File Name: " + fileName;
 
-  // Close overlay on direct background click
-  modalOverlay.onclick = (e) => {
-    if(e.target === modalOverlay) modalOverlay.style.display = "none";
-  };
-
-  // Select item type triggers device picker
-  document.querySelectorAll(".type-box").forEach(box => {
-    box.onclick = () => {
-      selectedType = box.getAttribute("data-type");
-      if(selectedType === "audio") hiddenFileInput.accept = "audio/*";
-      if(selectedType === "images") hiddenFileInput.accept = "image/*";
-      if(selectedType === "video") hiddenFileInput.accept = "video/*";
-      hiddenFileInput.click();
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      base64Data = event.target.result;
+      document.getElementById('plus-container').style.display = 'none';
+      document.getElementById('editor-container').style.display = 'block';
     };
-  });
-
-  // Handle local file chosen
-  hiddenFileInput.onchange = (e) => {
-    if(e.target.files.length > 0) {
-      targetFile = e.target.files[0];
-      fileDetailTile.innerText = `File: ${targetFile.name} (${(targetFile.size/1024/1024).toFixed(2)} MB)`;
-      typeSelector.style.display = "none";
-      dataPanel.style.display = "block";
-    }
+    reader.readAsDataURL(file);
   };
 
-  // Submit Processing
-  document.getElementById("submitBtn").onclick = async () => {
-    if(!targetFile) return;
-    
-    // Package Q/A Arrays
-    let questions = {};
-    let answers = {};
-    for(let i=1; i<=10; i++){
-      questions[`q${i}`] = document.getElementById(`q_${i}`).value || "";
-      answers[`a${i}`] = document.getElementById(`a_${i}`).value || "";
+  document.getElementById('submit-btn').onclick = async function() {
+    let questions = [];
+    let answers = [];
+    for(let i=1; i<=10; i++) {
+      questions.push(document.getElementById(`q-${i}`).value);
+      answers.push(document.getElementById(`a-${i}`).value);
     }
 
-    document.getElementById("submitBtn").innerText = "UPLOADING...";
-    
-    try {
-      // 1. Upload media asset to storage
-      const storagePath = `${selectedType}/${Date.now()}_${targetFile.name}`;
-      const fileRef = sRef(storage, storagePath);
-      const snapshot = await uploadBytes(fileRef, targetFile);
-      const downloadURL = await getDownloadURL(snapshot.ref);
+    const payload = {
+      name: fileName,
+      type: currentType,
+      data: base64Data,
+      questions: questions,
+      answers: answers,
+      timestamp: Date.now()
+    };
 
-      // 2. Write structural entry to Realtime Database
-      const dbRef = ref(db, `quizes/${selectedType}`);
-      const newQuizRef = push(dbRef);
-      await set(newQuizRef, {
-        fileName: targetFile.name,
-        fileUrl: downloadURL,
-        questions: questions,
-        answers: answers
-      });
-
-      alert("Data Saved Successfully!");
-      location.reload();
-    } catch (err) {
-      console.error(err);
-      alert("Error saving database elements.");
-      document.getElementById("submitBtn").innerText = "SUBMIT";
-    }
+    let targetRef = ref(db, "quizMedia/" + currentType);
+    await push(targetRef, payload);
+    alert("Quiz item saved successfully!");
+    location.reload();
   };
 </script>
 </body>
